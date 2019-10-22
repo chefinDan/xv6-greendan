@@ -139,13 +139,12 @@ int getpid(void);
 char* sbrk(int);
 int sleep(int);
 int uptime(void);
-#ifdef GETPPID
+
+// added by greendam
 int getppid(void);
-#endif // GETPPID
-#ifdef CPS
 int cps(int);
-#endif // CPS
 int kdebug(int);
+int halt(void);
 
 // ulib.c
 int stat(const char*, struct stat*);

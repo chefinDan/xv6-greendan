@@ -4,6 +4,8 @@
 #include "user.h"
 #include "fcntl.h"
 
+#define BENNY 1
+
 // Parsed command representation
 #define EXEC  1
 #define REDIR 2
@@ -63,7 +65,7 @@ runcmd(struct cmd *cmd)
   struct listcmd *lcmd;
   struct pipecmd *pcmd;
   struct redircmd *rcmd;
-
+  char c[20]; //for adding '/' to ls cmd
   if(cmd == 0)
     exit();
 
@@ -75,7 +77,13 @@ runcmd(struct cmd *cmd)
     ecmd = (struct execcmd*)cmd;
     if(ecmd->argv[0] == 0)
       exit();
+    // printf(2, "-> %s: ecmd->argv[0] size= %s\n", __FILE__, ecmd->argv[0]);
     exec(ecmd->argv[0], ecmd->argv);
+    {
+      c[0] = '/';
+      strcpy((c + 1), ecmd->argv[0]);
+      exec(c, ecmd->argv);
+    }
     printf(2, "exec %s failed\n", ecmd->argv[0]);
     break;
 

@@ -13,6 +13,12 @@
 # define TRUE 1
 #endif
 
+#ifndef PROC_TIME
+# define PROC_TIME 1
+#endif
+
+#include "date.h"
+
 
 // Per-CPU state
 struct cpu {
@@ -64,6 +70,12 @@ struct proc {
   int killed;                  // If non-zero, have been killed
   struct file *ofile[NOFILE];  // Open files
   struct inode *cwd;           // Current directory
+  #ifdef PROC_TIME             // Allows control over addition of time data members
+    struct rtcdate begin_date;   //
+    uint ticks_total;            // total number of time ticks that the process has run.
+    uint ticks_begin;            // help calculate the total number of time ticks the process has used
+    uint sched_times;            // number of times process has been scheduled to run
+  #endif // PROC_TIME 
   char name[16];               // Process name (debugging)
 };
 

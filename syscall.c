@@ -103,13 +103,12 @@ extern int sys_unlink(void);
 extern int sys_wait(void);
 extern int sys_write(void);
 extern int sys_uptime(void);
-#ifdef GETPPID
+
+// Added by greendan
 extern int sys_getppid(void);
-#endif // GETPPID
-#ifdef CPS
 extern int sys_cps(void);
-#endif // CPS
 extern int sys_kdebug(void);
+extern int sys_halt(void);
 
 static int (*syscalls[])(void) = {
 [SYS_fork]    sys_fork,
@@ -133,13 +132,11 @@ static int (*syscalls[])(void) = {
 [SYS_link]    sys_link,
 [SYS_mkdir]   sys_mkdir,
 [SYS_close]   sys_close,
-#ifdef GETPPID
+// added by greendan
 [SYS_getppid] sys_getppid,
-#endif // GETPPID
-#ifdef CPS
 [SYS_cps]     sys_cps,
-#endif // CPS
-[SYS_kdebug] sys_kdebug,
+[SYS_kdebug]  sys_kdebug,
+[SYS_halt]    sys_halt,
 };
 
 void

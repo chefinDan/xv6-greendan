@@ -108,10 +108,17 @@ sys_kdebug(void)
 int
 sys_uptime(void)
 {
-  uint xticks;
+  return uptime();
+  // uint xticks;
 
-  acquire(&tickslock);
-  xticks = ticks;
-  release(&tickslock);
-  return xticks;
+  // acquire(&tickslock);
+  // xticks = ticks;
+  // release(&tickslock);
+  // return xticks;
+}
+
+int sys_halt(void)
+{
+  outb(0xf4, 0x00);
+  return 0;
 }

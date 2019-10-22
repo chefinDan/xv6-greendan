@@ -9,7 +9,7 @@ main(int argc, char *argv[])
     if (argc > 1) {
         val = atoi(argv[1]);
     }
-
+    printf(2, "-> %s: calling kdebug(%d)\n", __FILE__, val);
     kdebug(val);
 
     exit();

@@ -20,10 +20,12 @@ exec(char *path, char **argv)
   struct proc *curproc = myproc();
 
   begin_op();
-
+  // cprintf("-> %s: path = %s\n", __FILE__, path);
+  // cprintf("--> namei(path) = %d\n", namei(path));
+  // cprintf("--> ");
   if((ip = namei(path)) == 0){
     end_op();
-    cprintf("exec: fail\n");
+    // cprintf("exec: fail\n");
     return -1;
   }
   ilock(ip);

@@ -29,11 +29,8 @@ SYSCALL(getpid)
 SYSCALL(sbrk)
 SYSCALL(sleep)
 SYSCALL(uptime)
-#ifdef GETPPID
-SYSCALL(getppid)
-#endif // GETPPID
-#ifdef CPS
-SYSCALL(cps)
-#endif // CPS
 
+SYSCALL(getppid)
+SYSCALL(cps)
 SYSCALL(kdebug)
+SYSCALL(halt)

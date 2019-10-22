@@ -114,6 +114,13 @@ found:
   memset(p->context, 0, sizeof *p->context);
   p->context->eip = (uint)forkret;
 
+  #ifdef PROC_TIME
+    // set time data in proc struct 
+    cmostime(&(p->begin_date));
+    p->ticks_begin = 0;
+    p->ticks_total = 0;
+    p->sched_times = 0;
+  #endif
   return p;
 }
 
@@ -316,6 +323,18 @@ wait(void)
   }
 }
 
+// implementation of uptime() that is called by sys_uptime() 
+int
+uptime(void)
+{
+  uint xticks;
+
+  acquire(&tickslock);
+  xticks = ticks;
+  release(&tickslock);
+  return xticks;
+}
+
 //PAGEBREAK: 42
 // Per-CPU process scheduler.
 // Each CPU calls scheduler() after setting itself up.
@@ -328,8 +347,8 @@ void
 scheduler(void)
 {
   struct proc *p;
-  struct cpu *c = mycpu();
-  c->proc = 0;
+  struct cpu *cpu = mycpu();
+  cpu->proc = 0;
   
   for(;;){
     // Enable interrupts on this processor.
@@ -344,16 +363,24 @@ scheduler(void)
       // Switch to chosen process.  It is the process's job
       // to release ptable.lock and then reacquire it
       // before jumping back to us.
-      c->proc = p;
+      cpu->proc = p;
       switchuvm(p);
-      p->state = RUNNING;
 
-      swtch(&(c->scheduler), p->context);
+      // update time data
+      #ifdef PROC_TIME
+        p->sched_times++;
+        p->ticks_begin = uptime();
+      #endif
+      p->state = RUNNING;
+      swtch(&(cpu->scheduler), p->context);
       switchkvm();
+      #ifdef PROC_TIME
+        p->ticks_total+=(p->ticks_begin);
+      #endif
 
       // Process is done running for now.
       // It should have changed its p->state before coming back.
-      c->proc = 0;
+      cpu->proc = 0;
     }
     release(&ptable.lock);
 
@@ -519,7 +546,7 @@ sys_cps(void)
 
     acquire(&ptable.lock);
     cprintf(
-        "pid\tppid\tname\tstate\tsize"
+        "pid\tppid\tname\tstate\tsize\tstart_time\tticks\tsched"
         );
     cprintf("\n");
     for (i = 0; i < NPROC; i++) {
@@ -529,13 +556,16 @@ sys_cps(void)
                 state = states[ptable.proc[i].state];
             }
             else {
-                state = "uknown";
+                state = "unknown";
             }
-            cprintf("%d\t%d\t%s\t%s\t%u"
+            cprintf("%d\t%d\t%s\t%s\t%u\t%d-%d-%d\t%d\t%d"
                     , ptable.proc[i].pid
                     , ptable.proc[i].parent ? ptable.proc[i].parent->pid : 1
                     , ptable.proc[i].name, state
                     , ptable.proc[i].sz
+                    , ptable.proc[i].begin_date.year, ptable.proc[i].begin_date.month, ptable.proc[i].begin_date.day
+                    , ptable.proc[i].ticks_total
+                    , ptable.proc[i].sched_times
                 );
             cprintf("\n");
         }
