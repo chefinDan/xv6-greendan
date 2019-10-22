@@ -6,6 +6,7 @@
 #include "x86.h"
 #include "proc.h"
 #include "spinlock.h"
+#include "date.h"
 
 uint debugState = FALSE;
 
@@ -543,10 +544,11 @@ sys_cps(void)
 {
     int i;
     const char *state = NULL;
+    struct rtcdate *date;
 
     acquire(&ptable.lock);
     cprintf(
-        "pid\tppid\tname\tstate\tsize\tstart_time\tticks\tsched"
+        "pid\tppid\tname\tstate\tsize\tstart_time\t\tticks\tsched"
         );
     cprintf("\n");
     for (i = 0; i < NPROC; i++) {
@@ -558,12 +560,14 @@ sys_cps(void)
             else {
                 state = "unknown";
             }
-            cprintf("%d\t%d\t%s\t%s\t%u\t%d-%d-%d\t%d\t%d"
+            date = &ptable.proc[i].begin_date;
+            cprintf("%d\t%d\t%s\t%s\t%u\t%d-%d-%d %d:%d:%d\t%d\t%d"
                     , ptable.proc[i].pid
                     , ptable.proc[i].parent ? ptable.proc[i].parent->pid : 1
                     , ptable.proc[i].name, state
                     , ptable.proc[i].sz
-                    , ptable.proc[i].begin_date.year, ptable.proc[i].begin_date.month, ptable.proc[i].begin_date.day
+                    , date->year, date->month, date->day
+                    , date->hour, date->minute, date->second
                     , ptable.proc[i].ticks_total
                     , ptable.proc[i].sched_times
                 );
