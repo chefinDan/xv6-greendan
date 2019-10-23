@@ -1,5 +1,5 @@
-#ifndef __DATE
-#define __DATE
+#ifndef __DATE_H
+#define __DATE_H
 
 struct rtcdate {
   uint second;
