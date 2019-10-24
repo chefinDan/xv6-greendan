@@ -21,6 +21,10 @@
 # define CPS 1
 #endif
 
+#ifndef GETPPID
+# define GETPPID 1
+#endif
+
 #include "date.h"
 
 

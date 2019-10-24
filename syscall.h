@@ -26,3 +26,4 @@
 #define SYS_cps    23
 #define SYS_kdebug 24
 #define SYS_halt   25
+#define SYS_random 26
