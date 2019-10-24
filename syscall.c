@@ -6,6 +6,7 @@
 #include "proc.h"
 #include "x86.h"
 #include "syscall.h"
+#include "rand.h"
 
 // User code makes a system call with INT T_SYSCALL.
 // System call number in %eax.
@@ -109,7 +110,7 @@ extern int sys_getppid(void);
 extern int sys_cps(void);
 extern int sys_kdebug(void);
 extern int sys_halt(void);
-extern int sys_random(void);
+extern int sys_rand(void);
 
 static int (*syscalls[])(void) = {
 [SYS_fork]    sys_fork,
@@ -138,7 +139,7 @@ static int (*syscalls[])(void) = {
 [SYS_cps]     sys_cps,
 [SYS_kdebug]  sys_kdebug,
 [SYS_halt]    sys_halt,
-[SYS_random]    sys_random,
+[SYS_rand]    sys_rand,
 };
 
 void

@@ -1738,12 +1738,12 @@ void argptest()
 }
 
 unsigned long randstate = 1;
-unsigned int
-rand()
-{
-  randstate = randstate * 1664525 + 1013904223;
-  return randstate;
-}
+// unsigned int
+// rand()
+// {
+//   randstate = randstate * 1664525 + 1013904223;
+//   return randstate;
+// }
 
 int
 main(int argc, char *argv[])

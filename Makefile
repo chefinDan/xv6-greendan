@@ -195,6 +195,7 @@ UPROGS=\
 	_mult\
 	_mfork\
 	_shutdown\
+	_random\
 	$(NULL)
 
 fs.img: mkfs README $(UPROGS)

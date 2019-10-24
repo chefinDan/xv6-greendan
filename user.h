@@ -117,6 +117,10 @@
 # define GETPPID 1
 #endif
 
+#ifndef RAND
+# define RAND
+#endif
+
 
 struct stat;
 struct rtcdate;
@@ -149,8 +153,6 @@ int getppid(void);
 int cps(int);
 int kdebug(int);
 int halt(void);
-unsigned int rand(void);
-void srand(int);
 
 // ulib.c
 int stat(const char*, struct stat*);

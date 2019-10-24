@@ -6,6 +6,7 @@
 #include "memlayout.h"
 #include "mmu.h"
 #include "proc.h"
+#include "rand.h"
 
 int
 sys_fork(void)
@@ -109,16 +110,17 @@ int
 sys_uptime(void)
 {
   return uptime();
-
 }
 
-int sys_halt(void)
+int 
+sys_halt(void)
 {
   outb(0xf4, 0x00);
   return 0;
 }
 
 int
-sys_random(void){
-  return 0;
+sys_rand(void)
+{
+  return rand();
 }
