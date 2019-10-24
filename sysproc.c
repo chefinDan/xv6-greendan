@@ -109,12 +109,7 @@ int
 sys_uptime(void)
 {
   return uptime();
-  // uint xticks;
 
-  // acquire(&tickslock);
-  // xticks = ticks;
-  // release(&tickslock);
-  // return xticks;
 }
 
 int sys_halt(void)

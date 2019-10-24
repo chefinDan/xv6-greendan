@@ -17,6 +17,10 @@
 # define PROC_TIME 1
 #endif
 
+#ifndef CPS
+# define CPS 1
+#endif
+
 #include "date.h"
 
 

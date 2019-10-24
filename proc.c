@@ -325,7 +325,7 @@ wait(void)
 }
 
 // implementation of uptime() that is called by sys_uptime() 
-int
+uint
 uptime(void)
 {
   uint xticks;
@@ -369,14 +369,14 @@ scheduler(void)
 
       // update time data
       #ifdef PROC_TIME
-        p->sched_times++;
         p->ticks_begin = uptime();
+        p->sched_times++;
       #endif
       p->state = RUNNING;
       swtch(&(cpu->scheduler), p->context);
       switchkvm();
       #ifdef PROC_TIME
-        p->ticks_total+=(p->ticks_begin);
+        p->ticks_total+=(uptime()-p->ticks_begin);
       #endif
 
       // Process is done running for now.
