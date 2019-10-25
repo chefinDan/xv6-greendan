@@ -81,6 +81,8 @@ OBJDUMP = $(TOOLPREFIX)objdump
 DEFINES = 
 DEFINES += -DGETPPID
 DEFINES += -DCPS
+DEFINES += -DPROC_TIME
+DEFINES += -DLOTTERY_SCHED #comment out to use original round-robin scheduler 
 CFLAGS = $(DEFINES) -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer
 CFLAGS += $(shell $(CC) -fno-stack-protector -E -x c /dev/null >/dev/null 2>&1 && echo -fno-stack-protector)
 ASFLAGS = $(DEFINES) -m32 -gdwarf-2 -Wa,-divide
@@ -196,6 +198,8 @@ UPROGS=\
 	_mfork\
 	_shutdown\
 	_random\
+	_renice\
+	_nice\
 	$(NULL)
 
 fs.img: mkfs README $(UPROGS)

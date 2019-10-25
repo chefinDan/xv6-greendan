@@ -27,3 +27,4 @@
 #define SYS_kdebug 24
 #define SYS_halt   25
 #define SYS_rand   26
+#define SYS_renice 27

@@ -121,6 +121,7 @@ int             wait(void);
 uint            uptime(void);
 void            wakeup(void*);
 void            yield(void);
+int             renice(int, int);
 
 // swtch.S
 void            swtch(struct context**, struct context*);

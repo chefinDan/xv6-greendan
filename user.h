@@ -113,15 +113,6 @@
 #  define PGSIZE 4096
 # endif // PGSIZE
 
-#ifndef GETPPID
-# define GETPPID 1
-#endif
-
-#ifndef RAND
-# define RAND
-#endif
-
-
 struct stat;
 struct rtcdate;
 
@@ -153,6 +144,7 @@ int getppid(void);
 int cps(int);
 int kdebug(int);
 int halt(void);
+int renice(int, int);
 
 // ulib.c
 int stat(const char*, struct stat*);

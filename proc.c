@@ -7,6 +7,7 @@
 #include "proc.h"
 #include "spinlock.h"
 #include "date.h"
+#include "rand.h"
 
 uint debugState = FALSE;
 
@@ -121,6 +122,10 @@ found:
     p->ticks_begin = 0;
     p->ticks_total = 0;
     p->sched_times = 0;
+  #endif
+  #ifdef LOTTERY_SCHED
+    // set initial nice value for lottery sched
+    p->nice_value = DEFAULT_NICE_VALUE;
   #endif
   return p;
 }
@@ -350,42 +355,63 @@ scheduler(void)
   struct proc *p;
   struct cpu *cpu = mycpu();
   cpu->proc = 0;
-  
-  for(;;){
-    // Enable interrupts on this processor.
-    sti();
+  uint niceSum = 0;
+  uint randValue = 0; 
+  uint niceSumDrawing = 0; 
 
-    // Loop over process table looking for process to run.
-    acquire(&ptable.lock);
-    for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-      if(p->state != RUNNABLE)
-        continue;
+    for(;;){
+      // Enable interrupts on this processor.
+      sti();
 
-      // Switch to chosen process.  It is the process's job
-      // to release ptable.lock and then reacquire it
-      // before jumping back to us.
-      cpu->proc = p;
-      switchuvm(p);
+        // Loop over process table looking for runnable procs and sum nice_values
+        acquire(&ptable.lock);
+        for (p = ptable.proc; p < &ptable.proc[NPROC]; p++)
+        {
+          if (p->state == RUNNABLE){
+            niceSum += p->nice_value;
+          }
+        }
 
-      // update time data
-      #ifdef PROC_TIME
-        p->ticks_begin = uptime();
-        p->sched_times++;
-      #endif
-      p->state = RUNNING;
-      swtch(&(cpu->scheduler), p->context);
-      switchkvm();
-      #ifdef PROC_TIME
-        p->ticks_total+=(uptime()-p->ticks_begin);
-      #endif
+        if(niceSum == 0){
+          release(&ptable.lock); 
+          continue;
+        }
+        randValue = rand() % niceSum + MIN_NICE_VALUE;
+        
+        for (p = ptable.proc; p < &ptable.proc[NPROC]; p++)
+        {
+          if (p->state != RUNNABLE)
+            continue;
+          
+          niceSumDrawing += p->nice_value;
+          if (niceSumDrawing <= randValue)
+              continue;
+          
+        // Switch to chosen process.  It is the process's job
+        // to release ptable.lock and then reacquire it
+        // before jumping back to us.
+        // cprintf("p->state: %d\n", p->state);
+        cpu->proc = p;
+        switchuvm(p);
 
-      // Process is done running for now.
-      // It should have changed its p->state before coming back.
-      cpu->proc = 0;
+        // update time data
+        #ifdef PROC_TIME
+          p->ticks_begin = uptime();
+          p->sched_times++;
+        #endif
+        p->state = RUNNING;
+        swtch(&(cpu->scheduler), p->context);
+        switchkvm();
+        #ifdef PROC_TIME
+          p->ticks_total+=(uptime()-p->ticks_begin);
+        #endif
+
+        // Process is done running for now.
+        // It should have changed its p->state before coming back.
+        cpu->proc = 0;
+      }
+      release(&ptable.lock);
     }
-    release(&ptable.lock);
-
-  }
 }
 
 // Enter scheduler.  Must hold only ptable.lock
@@ -610,4 +636,30 @@ procdump(void)
     }
     cprintf("\n");
   }
+}
+
+int 
+renice(int pid, int nice_value){
+  struct proc *p;
+  uint found_pid = FALSE;
+
+  if(nice_value < MIN_NICE_VALUE || nice_value > MAX_NICE_VALUE){
+    cprintf("Invalid nice_value\n");
+    return 1;
+  }
+  cprintf("%s: pid: %d, nice_value: %d\n", __FILE__, pid, nice_value);
+  acquire(&ptable.lock);
+  for (p = ptable.proc; p < &ptable.proc[NPROC]; p++)
+  {
+    if (p->pid == pid)
+    {
+      cprintf("Found pid\n");
+      found_pid = TRUE;
+      p->nice_value = nice_value;
+      break;
+    }
+  }
+
+  release(&ptable.lock);
+  return (found_pid == TRUE) ? 0 : 2;
 }

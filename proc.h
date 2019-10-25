@@ -13,16 +13,16 @@
 # define TRUE 1
 #endif
 
-#ifndef PROC_TIME
-# define PROC_TIME 1
+#ifndef DEFAULT_NICE_VALUE
+# define DEFAULT_NICE_VALUE 20
 #endif
 
-#ifndef CPS
-# define CPS 1
+#ifndef MAX_NICE_VALUE
+# define MAX_NICE_VALUE 40
 #endif
 
-#ifndef GETPPID
-# define GETPPID 1
+#ifndef MIN_NICE_VALUE
+# define MIN_NICE_VALUE 1
 #endif
 
 #include "date.h"
@@ -83,7 +83,8 @@ struct proc {
     uint ticks_total;            // total number of time ticks that the process has run.
     uint ticks_begin;            // help calculate the total number of time ticks the process has used
     uint sched_times;            // number of times process has been scheduled to run
-  #endif // PROC_TIME 
+  #endif // PROC_TIME
+  uint nice_value;              // for implementing lottery scheduling 
   char name[16];               // Process name (debugging)
 };
 
