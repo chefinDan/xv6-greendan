@@ -356,7 +356,7 @@ scheduler(void)
   struct cpu *cpu = mycpu();
   cpu->proc = 0;
   uint niceSum = 0;
-  uint randValue = 0; 
+  uint randWinner = 0; 
   uint niceSumDrawing = 0; 
 
     for(;;){
@@ -376,24 +376,28 @@ scheduler(void)
           release(&ptable.lock); 
           continue;
         }
-        randValue = rand() % niceSum + MIN_NICE_VALUE;
+        randWinner = rand() % niceSum + MIN_NICE_VALUE;
         
+        // loop over process table and add each runnable procs nice value
+        // to niceSumDrawing, if sumDrawing is > the winner ticket, then run
+        // the current proc 
         for (p = ptable.proc; p < &ptable.proc[NPROC]; p++)
         {
           if (p->state != RUNNABLE)
             continue;
           
           niceSumDrawing += p->nice_value;
-          if (niceSumDrawing <= randValue)
+          if (niceSumDrawing <= randWinner)
               continue;
-          
+          niceSumDrawing = 0;
+          niceSum = 0;
+        
         // Switch to chosen process.  It is the process's job
         // to release ptable.lock and then reacquire it
         // before jumping back to us.
         // cprintf("p->state: %d\n", p->state);
         cpu->proc = p;
         switchuvm(p);
-
         // update time data
         #ifdef PROC_TIME
           p->ticks_begin = uptime();
@@ -403,7 +407,7 @@ scheduler(void)
         swtch(&(cpu->scheduler), p->context);
         switchkvm();
         #ifdef PROC_TIME
-          p->ticks_total+=(uptime()-p->ticks_begin);
+              p->ticks_total += (uptime() - p->ticks_begin);
         #endif
 
         // Process is done running for now.
@@ -574,7 +578,7 @@ sys_cps(void)
 
     acquire(&ptable.lock);
     cprintf(
-        "pid\tppid\tname\tstate\tsize\tstart_time\t\tticks\tsched"
+        "pid\tppid\tname\tstate\tsize\tstart_time\t\tticks\tsched\tnice"
         );
     cprintf("\n");
     for (i = 0; i < NPROC; i++) {
@@ -587,7 +591,7 @@ sys_cps(void)
                 state = "unknown";
             }
             date = &ptable.proc[i].begin_date;
-            cprintf("%d\t%d\t%s\t%s\t%u\t%d-%d-%d %d:%d:%d\t%d\t%d"
+            cprintf("%d\t%d\t%s\t%s\t%u\t%d-%d-%d %d:%d:%d\t%d\t%d\t%d"
                     , ptable.proc[i].pid
                     , ptable.proc[i].parent ? ptable.proc[i].parent->pid : 1
                     , ptable.proc[i].name, state
@@ -596,6 +600,7 @@ sys_cps(void)
                     , date->hour, date->minute, date->second
                     , ptable.proc[i].ticks_total
                     , ptable.proc[i].sched_times
+                    , ptable.proc[i].nice_value
                 );
             cprintf("\n");
         }
@@ -644,16 +649,13 @@ renice(int pid, int nice_value){
   uint found_pid = FALSE;
 
   if(nice_value < MIN_NICE_VALUE || nice_value > MAX_NICE_VALUE){
-    cprintf("Invalid nice_value\n");
     return 1;
   }
-  cprintf("%s: pid: %d, nice_value: %d\n", __FILE__, pid, nice_value);
   acquire(&ptable.lock);
   for (p = ptable.proc; p < &ptable.proc[NPROC]; p++)
   {
     if (p->pid == pid)
     {
-      cprintf("Found pid\n");
       found_pid = TRUE;
       p->nice_value = nice_value;
       break;

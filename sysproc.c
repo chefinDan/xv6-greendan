@@ -126,13 +126,13 @@ sys_rand(void)
 }
 
 int sys_renice(void){
-  int pid;
-  int nice_value;
+  int pid, nice_value;
 
-  if ((argint(0, &pid) < 0) || argint(1, &nice_value) < 0)
+  if ((argint(0, &pid) < 0) || argint(1, &nice_value) < 0){
+    cprintf("System Error: Unable to pop arguments off stack\n");
     return -1;
+  }
   
-  cprintf("%s: pid: %d, nice_value: %d\n", __FILE__, pid, nice_value);
   return renice(pid, nice_value);
   
 }
